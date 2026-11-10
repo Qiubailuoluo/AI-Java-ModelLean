@@ -1,0 +1,346 @@
+{
+  "info": {
+    "name": "Backend Lab - 01 Web Foundation",
+    "description": "模块01：新增与按ID查询用户。先运行02新增，再运行06查询；成功数据保留。baseUrl=http://127.0.0.1:18080。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:18080",
+      "type": "string"
+    },
+    {
+      "type": "string",
+      "value": "4",
+      "key": "userId"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - 服务连通性（当前预期 404）",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/",
+        "description": "服务启动后 GET / 返回 404，因为没有首页接口；这与连接被拒绝不同。"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"当前阶段：没有首页接口，预期返回 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - 新增用户成功（201）",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\n  \"username\": \"{{newUsername}}\",\n  \"nickname\": \"Postman练习用户\"\n}"
+        },
+        "url": "{{baseUrl}}/api/users",
+        "description": "发送前自动生成合法用户名，避免重复；成功数据保留在数据库。响应 data 含实际 ID 和创建时间。"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.collectionVariables.set(\"newUsername\", \"postman_\" + Date.now());"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 状态正确\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"统一响应代码正确\", function () {",
+              "    pm.expect(pm.response.json().code).to.eql('SUCCESS');",
+              "});",
+              "if (pm.response.code === 201) {",
+              "    pm.collectionVariables.set(\"userId\", String(pm.response.json().data.id));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - 用户名重复（409）",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\n  \"username\": \"{{newUsername}}\",\n  \"nickname\": \"重复创建演示\"\n}"
+        },
+        "url": "{{baseUrl}}/api/users",
+        "description": "先运行02新增成功，再用其生成的newUsername重复创建，预期409；不会修改原用户。"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 状态正确\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "pm.test(\"统一响应代码正确\", function () {",
+              "    pm.expect(pm.response.json().code).to.eql('USERNAME_ALREADY_EXISTS');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - 字段校验失败（400）",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\n  \"username\": \"a b\",\n  \"nickname\": \"   \"\n}"
+        },
+        "url": "{{baseUrl}}/api/users",
+        "description": "用户名包含空格、昵称全为空白；返回一条字段提示，提示顺序不固定，不会插入用户。"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 状态正确\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"统一响应代码正确\", function () {",
+              "    pm.expect(pm.response.json().code).to.eql('INVALID_ARGUMENT');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - JSON格式错误（400）",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{broken"
+        },
+        "url": "{{baseUrl}}/api/users",
+        "description": "故意发送无效 JSON，观察请求体解析异常如何转换为统一响应。"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 状态正确\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"统一响应代码正确\", function () {",
+              "    pm.expect(pm.response.json().code).to.eql('INVALID_ARGUMENT');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - 按ID查询成功（200）",
+      "request": {
+        "description": "先运行02，自动保存创建所得userId；本机也可将userId设为已存在的4、6、10。GET无请求体。",
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/users/{{userId}}",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP状态正确', function () { pm.response.to.have.status(200); });",
+              "pm.test('响应代码正确', function () { pm.expect(pm.response.json().code).to.eql('SUCCESS'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - 用户不存在（404）",
+      "request": {
+        "description": "合法的Long正整数，但练习库中没有对应记录。",
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/users/9223372036854775807",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP状态正确', function () { pm.response.to.have.status(404); });",
+              "pm.test('响应代码正确', function () { pm.expect(pm.response.json().code).to.eql('USER_NOT_FOUND'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - ID不是正整数（400）",
+      "request": {
+        "description": "Long转换成功，业务层拒绝0；也可以换成-1。",
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/users/0",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP状态正确', function () { pm.response.to.have.status(400); });",
+              "pm.test('响应代码正确', function () { pm.expect(pm.response.json().code).to.eql('INVALID_ARGUMENT'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - ID不是数字（400）",
+      "request": {
+        "description": "路径参数无法转换为Long，尚未进入业务方法。",
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/users/abc",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP状态正确', function () { pm.response.to.have.status(400); });",
+              "pm.test('响应代码正确', function () { pm.expect(pm.response.json().code).to.eql('INVALID_ARGUMENT'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - ID超出Long范围（400）",
+      "request": {
+        "description": "超出Long最大值，参数转换阶段返回400。",
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{baseUrl}}/api/users/9223372036854775808",
+        "header": []
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP状态正确', function () { pm.response.to.have.status(400); });",
+              "pm.test('响应代码正确', function () { pm.expect(pm.response.json().code).to.eql('INVALID_ARGUMENT'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+**/target/
+**/.idea/
+*.iml
+.vscode/
+.env
+.env.*
+!.env.example
+**/application-local.yml
+**/application-local.yaml
+**/application-local.properties
+notes/90-本地账户/
+notes/.obsidian/workspace*.json
+notes/.obsidian/cache/
+infra/data/
+infra/logs/
+infra/local/
+*.log
+
+# 临时验证与草稿
+/work/

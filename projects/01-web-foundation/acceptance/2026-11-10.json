@@ -1,0 +1,91 @@
+{
+  "module": "01-web-foundation",
+  "passed": true,
+  "cases": 13,
+  "preservedUser": {
+    "id": 15,
+    "createdAt": "2026-11-10T14:05:56",
+    "nickname": "模块验收用户",
+    "username": "accept_11ad77a19362"
+  },
+  "checks": [
+    {
+      "path": "/api/users",
+      "status": 201,
+      "code": "SUCCESS",
+      "method": "POST"
+    },
+    {
+      "path": "/api/users/15",
+      "status": 200,
+      "code": "SUCCESS",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users",
+      "status": 409,
+      "code": "USERNAME_ALREADY_EXISTS",
+      "method": "POST"
+    },
+    {
+      "path": "/api/users",
+      "status": 400,
+      "code": "INVALID_ARGUMENT",
+      "method": "POST"
+    },
+    {
+      "path": "/api/users",
+      "status": 400,
+      "code": "INVALID_ARGUMENT",
+      "method": "POST"
+    },
+    {
+      "path": "/api/users",
+      "status": 400,
+      "code": "INVALID_ARGUMENT",
+      "method": "POST"
+    },
+    {
+      "path": "/api/users/9223372036854775807",
+      "status": 404,
+      "code": "USER_NOT_FOUND",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/0",
+      "status": 400,
+      "code": "INVALID_ARGUMENT",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/-1",
+      "status": 400,
+      "code": "INVALID_ARGUMENT",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/abc",
+      "status": 400,
+      "code": "INVALID_ARGUMENT",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/9223372036854775808",
+      "status": 400,
+      "code": "INVALID_ARGUMENT",
+      "method": "GET"
+    },
+    {
+      "path": "/no-such-lab-route",
+      "status": 404,
+      "code": "HTTP_ERROR",
+      "method": "GET"
+    },
+    {
+      "path": "/api/users",
+      "status": 405,
+      "code": "HTTP_ERROR",
+      "method": "PUT"
+    }
+  ]
+}

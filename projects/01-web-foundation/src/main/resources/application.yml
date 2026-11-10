@@ -1,0 +1,23 @@
+spring:
+  application:
+    # 应用名称，不是数据库名称。
+    name: web-foundation
+
+  datasource:
+    # JDBC 连接地址：本机 MySQL 的练习数据库，不连接其他项目的库。
+    url: jdbc:mysql://127.0.0.1:3306/lab_web_foundation?characterEncoding=UTF-8
+    # 启动前通过当前进程的环境变量提供，不把本机账号密码写进公共配置。
+    username: ${LAB_DB_USERNAME}
+    password: ${LAB_DB_PASSWORD}
+
+mybatis:
+  configuration:
+    # 查询结果自动映射时，将 created_at 对应到 Java 属性 createdAt。
+    # 这不会生成表、SQL 或接口。
+    map-underscore-to-camel-case: true
+
+server:
+  # 仅监听本机回环地址。
+  address: 127.0.0.1
+  # HTTP 服务端口，与 MySQL 的 3306 端口无关。
+  port: 18080
